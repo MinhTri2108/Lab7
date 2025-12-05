@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="container">
+        <h1>📦 Product Management System</h1>
+        
+        <div th:if="${message}" class="alert alert-success">
+            <span th:text="${message}"></span>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-error">
+            <span th:text="${error}"></span>
+        </div>
+        
+        <div class="actions">
+            <a th:href="@{/products/new}" class="btn btn-primary">➕ Add New Product</a>
+            
+            <form th:action="@{/products/search}" method="get" class="search-form">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Quick search..." />
+                <button type="submit" class="btn btn-primary">🔍</button>
+            </form>
+        </div>
+
+        <div class="advanced-search">
+            <h3>⚡ Advanced Filter</h3>
+            <form th:action="@{/products/advanced-search}" method="get">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" name="name" th:value="${searchName}" placeholder="e.g. Smartphone">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select name="category" onchange="this.form.submit()">
+                            <option value="">All Categories</option>
+                            <option th:each="cat : ${categories}" 
+                                    th:value="${cat}" 
+                                    th:text="${cat}"
+                                    th:selected="${cat == selectedCategory}">
+                            </option>
+                        </select>                        
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Min Price ($)</label>
+                        <input type="number" name="minPrice" th:value="${searchMinPrice}" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Max Price ($)</label>
+                        <input type="number" name="maxPrice" th:value="${searchMaxPrice}" step="0.01" min="0" placeholder="Max">
+                    </div>
+                </div>
+                
+                <div class="search-actions">
+                    <a th:href="@{/products}" class="btn-reset">Reset Filters</a>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+        
+        <div th:if="${products != null and !products.isEmpty()}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Category</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="product : ${products}">
+                        <td th:text="${product.id}">1</td>
+                        <td th:text="${product.productCode}">P001</td>
+                        <td th:text="${product.name}">Product Name</td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}">$99.99</td>
+                        <td th:text="${product.quantity}">10</td>
+                        <td th:text="${product.category}">Electronics</td>
+                        <td>
+                            <div class="actions-column">
+                                <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-success btn-sm">✏️ Edit</a>
+                                <a th:href="@{/products/delete/{id}(id=${product.id})}" 
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Are you sure you want to delete this product?')">
+                                    🗑️ Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div th:if="${keyword != null and totalPages > 1}" class="pagination">
+            
+            <!-- Previous Link -->
+            <a th:if="${currentPage > 0}" 
+               th:href="@{/products/search(keyword=${keyword}, page=${currentPage - 1})}"
+               class="btn-sm">
+               &laquo; Prev
+            </a>
+            <span th:unless="${currentPage > 0}" class="disabled">&laquo; Prev</span>
+
+            <!-- Page Number Indicator -->
+            <span class="active" th:text="${currentPage + 1} + ' / ' + ${totalPages}">1 / 5</span>
+
+            <!-- Next Link -->
+            <a th:if="${currentPage < totalPages - 1}" 
+               th:href="@{/products/search(keyword=${keyword}, page=${currentPage + 1})}"
+               class="btn-sm">
+               Next &raquo;
+            </a>
+            <span th:unless="${currentPage < totalPages - 1}" class="disabled">Next &raquo;</span>
+        </div>
+
+        <div th:if="${products == null or products.isEmpty()}" class="empty-state">
+            <p>No products found matching your criteria.</p>
+            <a th:href="@{/products}" class="btn btn-primary btn-sm" style="margin-top: 10px;">View All Products</a>
+        </div>
+    </div>
+</body>
+</html>
