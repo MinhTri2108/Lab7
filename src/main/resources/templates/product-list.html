@@ -8,25 +8,41 @@
 </head>
 <body>
     <div class="container">
-        <h1>📦 Product Management System</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #edf2f7; padding-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="font-size: 2.5rem;">📦</span>
+                <div>
+                    <h1 style="margin: 0; font-size: 1.8rem; color: #2d3748;">Product Management</h1>
+                    <p style="margin: 0; color: #718096; font-size: 0.9rem;">System Overview</p>
+                </div>
+            </div>
+            
+            <a th:href="@{/dashboard}" class="btn" style="background: white; color: #2d3748; border: 2px solid #e2e8f0; font-weight: 700;">
+                📊Dashboard
+            </a>
+        </div>
         
         <div th:if="${message}" class="alert alert-success">
             <span th:text="${message}"></span>
         </div>
-        
         <div th:if="${error}" class="alert alert-error">
             <span th:text="${error}"></span>
         </div>
         
-        <div class="actions">
-            <a th:href="@{/products/new}" class="btn btn-primary">➕ Add New Product</a>
+        <div class="actions" style="background: #f7fafc; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <a th:href="@{/products/new}" class="btn btn-primary" style="box-shadow: 0 4px 14px 0 rgba(102, 126, 234, 0.39);">
+                ➕ Add New Product
+            </a>
             
-            <form th:action="@{/products/search}" method="get" class="search-form">
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="Quick search..." />
-                <button type="submit" class="btn btn-primary">🔍</button>
+            <form th:action="@{/products/search}" method="get" class="search-form" style="margin: 0;">
+                <div style="position: relative;">
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Search products..." 
+                           style="padding-left: 40px; border-radius: 50px; border: 1px solid #e2e8f0; width: 300px;">
+                    <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); opacity: 0.5;">🔍</span>
+                </div>
             </form>
         </div>
-
+    
         <div class="advanced-search">
             <h3>⚡ Advanced Filter</h3>
             <form th:action="@{/products/advanced-search}" method="get">
@@ -49,13 +65,11 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Min Price ($)</label>
-                        <input type="number" name="minPrice" th:value="${searchMinPrice}" step="0.01" min="0" placeholder="0.00">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Max Price ($)</label>
-                        <input type="number" name="maxPrice" th:value="${searchMaxPrice}" step="0.01" min="0" placeholder="Max">
+                        <label>Price Range ($)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="number" name="minPrice" th:value="${searchMinPrice}" step="0.01" min="0" placeholder="Min">
+                            <input type="number" name="maxPrice" th:value="${searchMaxPrice}" step="0.01" min="0" placeholder="Max">
+                        </div>
                     </div>
                 </div>
                 
@@ -67,8 +81,8 @@
         </div>
         
         <div th:if="${products != null and !products.isEmpty()}">
-            <table>
-                <thead>
+            <table style="box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border-radius: 8px; overflow: hidden;">
+                <thead style="background: #edf2f7;">
                     <tr>
                         <th>ID</th>
                         <th>Code</th>
@@ -82,11 +96,20 @@
                 <tbody>
                     <tr th:each="product : ${products}">
                         <td th:text="${product.id}">1</td>
-                        <td th:text="${product.productCode}">P001</td>
-                        <td th:text="${product.name}">Product Name</td>
-                        <td th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}">$99.99</td>
-                        <td th:text="${product.quantity}">10</td>
-                        <td th:text="${product.category}">Electronics</td>
+                        <td th:text="${product.productCode}" style="font-weight: bold; color: #4a5568;">P001</td>
+                        <td th:text="${product.name}" style="font-weight: 600;">Product Name</td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 2)}" style="color: #48bb78; font-weight: bold;">$99.99</td>
+                        
+                        <td>
+                            <span th:class="${product.quantity < 10 ? 'badge-warning' : 'badge-success'}" 
+                                  th:text="${product.quantity}"
+                                  style="padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; background: #ebf8ff; color: #2b6cb0; font-weight: bold;">
+                            </span>
+                        </td>
+                        
+                        <td>
+                            <span style="background: #edf2f7; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; color: #4a5568;" th:text="${product.category}"></span>
+                        </td>
                         <td>
                             <div class="actions-column">
                                 <a th:href="@{/products/edit/{id}(id=${product.id})}" class="btn btn-success btn-sm">✏️ Edit</a>
@@ -102,31 +125,10 @@
             </table>
         </div>
         
-        <div th:if="${keyword != null and totalPages > 1}" class="pagination">
-            
-            <!-- Previous Link -->
-            <a th:if="${currentPage > 0}" 
-               th:href="@{/products/search(keyword=${keyword}, page=${currentPage - 1})}"
-               class="btn-sm">
-               &laquo; Prev
-            </a>
-            <span th:unless="${currentPage > 0}" class="disabled">&laquo; Prev</span>
-
-            <!-- Page Number Indicator -->
-            <span class="active" th:text="${currentPage + 1} + ' / ' + ${totalPages}">1 / 5</span>
-
-            <!-- Next Link -->
-            <a th:if="${currentPage < totalPages - 1}" 
-               th:href="@{/products/search(keyword=${keyword}, page=${currentPage + 1})}"
-               class="btn-sm">
-               Next &raquo;
-            </a>
-            <span th:unless="${currentPage < totalPages - 1}" class="disabled">Next &raquo;</span>
-        </div>
-
         <div th:if="${products == null or products.isEmpty()}" class="empty-state">
+            <img src="https://cdn-icons-png.flaticon.com/512/4076/4076432.png" width="100" style="opacity: 0.5; margin-bottom: 20px;">
             <p>No products found matching your criteria.</p>
-            <a th:href="@{/products}" class="btn btn-primary btn-sm" style="margin-top: 10px;">View All Products</a>
+            <a th:href="@{/products}" class="btn btn-primary btn-sm" style="margin-top: 10px;">Clear Search</a>
         </div>
     </div>
 </body>
